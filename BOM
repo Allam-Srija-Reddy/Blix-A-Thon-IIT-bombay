@@ -1,0 +1,23 @@
+BOM COMPONENTS USED AND THEIR ROLES
+Arduino Uno Brain — processes everything
+TCS3200 Color Sensor-Identifies cube color
+IR Sensor-Detects cube presence
+HC-SR04 Ultrasonic-Avoids walls/obstacles
+Servo Motor-Picks & places cubes
+DC Motors + L298N-Moves the robot
+Battery Pack-Powers all components
+EXPLANATION OF COMPONENTS IN DETAILED 
+🧠 1. Microcontroller — Arduino Uno
+Purpose: The brain of the entire robot. It reads inputs from all sensors, processes the logic, and sends commands to motors and servos. It has 14 digital I/O pins, 6 analog inputs, a 16 MHz crystal, and a USB connection for uploading code.   All sensor data and motor control flows through it.
+� 2. TCS3200 Color Sensor
+Purpose: The most critical sensor for this challenge — it detects the color of each cube (Red, Green, Blue). The color sensor identifies the color of the material, and the system then takes action depending on the color detected — the servo motor turns to a set angle based on the control signal from the Arduino.   Without this, the robot cannot know which cube goes where.
+� 3. IR Sensor (Infrared Proximity Sensor)
+Purpose: Detects whether a cube or object is present in front of the robot. An infrared sensor is capable of detecting obstacles in its path and providing a digital output   — so the robot knows when it has reached a colored zone and when a cube is within pickup range.
+⚙️ 4. Servo Motor (SG90 / MG996R)
+Purpose: Controls the gripper/arm mechanism to physically pick up and place cubes. The sorting mechanism is physically implemented through a servo motor that reroutes or picks materials with great precision based on the color information analyzed by the Arduino.   It rotates to specific angles on command.
+🔄 5. DC Motors (x2) + L298N Motor Driver
+Purpose: DC motors drive the wheels so the robot can move around the arena. The Arduino interfaces with the motor driver to control the DC motors. The motor driver receives power from the battery and distributes 5V to other components.Without the driver, Arduino alone can't supply enough current to run motors.
+📏 6. Ultrasonic Sensor (HC-SR04)
+Purpose: Measures distance to walls or objects so the robot doesn't crash into arena boundaries. The ultrasonic distance sensor provides a non-contact distance measurement function.   It sends out sound waves and measures how long they take to bounce back.
+🔋 7. Li-ion / 9V Battery Pack
+Purpose: Powers the entire robot autonomously during the run — since no manual control is allowed, the robot must be fully self-powered throughout the 10-minute window.
