@@ -1,0 +1,106 @@
+// ====== TCS3200 shared control pins ======
+#define S0 4
+#define S1 5
+#define S2 6
+#define S3 7
+
+// Separate OUT pins
+#define LEFT_OUT   2
+#define RIGHT_OUT  3
+
+// ====== Motor Driver (L298N) ======
+#define ENA 10
+#define ENB 11      // ✅ FIXED
+#define IN1 8
+#define IN2 9
+#define IN3 12
+#define IN4 13
+
+// ====== Parameters ======
+int baseSpeed = 170;        
+int turnBoost = 70;         
+unsigned long pulseTimeout = 1000;
+int threshold = 150;        // CALIBRATE THIS
+
+// ====== Setup ======
+void setup() {
+  pinMode(S0, OUTPUT);
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
+  pinMode(S3, OUTPUT);
+
+  pinMode(LEFT_OUT, INPUT);
+  pinMode(RIGHT_OUT, INPUT);
+
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // 20% frequency scaling
+  digitalWrite(S0, HIGH);
+  digitalWrite(S1, LOW);
+
+  Serial.begin(9600);
+}
+
+// ====== Read CLEAR channel ======
+int readClear(int outPin) {
+  digitalWrite(S2, HIGH);
+  digitalWrite(S3, LOW);
+
+  unsigned long pw = pulseIn(outPin, LOW, pulseTimeout);
+  if (pw == 0) pw = pulseTimeout;
+
+  int val = map(pw, 20, 400, 255, 0);
+  return constrain(val, 0, 255);
+}
+
+// ====== Motor Control ======
+void drive(int left, int right) {
+  left  = constrain(left, 0, 255);
+  right = constrain(right, 0, 255);
+
+  // Forward
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  analogWrite(ENA, left);
+  analogWrite(ENB, right);
+}
+
+void stopMotors() {
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+// ====== Main Loop ======
+void loop() {
+  int leftVal  = readClear(LEFT_OUT);
+  int rightVal = readClear(RIGHT_OUT);
+
+  Serial.print("L: "); Serial.print(leftVal);
+  Serial.print("  R: "); Serial.println(rightVal);
+
+  bool leftOnLine  = (leftVal  < threshold);
+  bool rightOnLine = (rightVal < threshold);
+
+  if (leftOnLine && rightOnLine) {
+    drive(baseSpeed, baseSpeed);            // straight
+  } 
+  else if (leftOnLine) {
+    drive(baseSpeed - turnBoost, baseSpeed + turnBoost); // left turn
+  } 
+  else if (rightOnLine) {
+    drive(baseSpeed + turnBoost, baseSpeed - turnBoost); // right turn
+  } 
+  else {
+    stopMotors();                           // white surface
+  }
+
+  delay(10);
+}
